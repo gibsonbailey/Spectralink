@@ -1,7 +1,10 @@
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <AL/alut.h>
+#include <wave.h>
 #include <stdio.h>
+#include <stdlib.h>
+
+static inline ALenum to_al_format(short channels, short samples);
 
 int main()
 {
@@ -65,10 +68,41 @@ int main()
     ALvoid *data;
     //ALboolean loop = AL_FALSE;
 
-    alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
+
+    // alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
+
+    WaveInfo *wave;
+    char *bufferData;
+    int ret;
+    
+    wave = WaveOpenFileForReading("./data/sin_1000Hz_-10dBFS_0.03s.wav");
+    if (!wave) {
+            fprintf(stderr, "failed to read wave file\n");
+            return -1;
+    }
+    
+    ret = WaveSeekFile(0, wave);
+    if (ret) {
+            fprintf(stderr, "failed to seek wave file\n");
+            return -1;
+    }
+    
+    bufferData = malloc(wave->dataSize);
+    if (!bufferData) {
+            perror("malloc");
+            return -1;
+    }
+    
+    ret = WaveReadFile(bufferData, wave->dataSize, wave);
+    if (ret != wave->dataSize) {
+            fprintf(stderr, "short read: %d, want: %d\n", ret, wave->dataSize);
+            return -1;
+    }
+
+    alBufferData(buffer, to_al_format(wave->channels, wave->bitsPerSample), bufferData, wave->dataSize, wave->sampleRate);
 
 
-    alBufferData(buffer, format, data, size, freq);
+    //alBufferData(buffer, format, data, size, freq);
 
     alSourcei(source, AL_BUFFER, buffer);
 
@@ -96,3 +130,24 @@ int main()
 
     return 0;
 }
+
+static inline ALenum to_al_format(short channels, short samples)
+{
+        int stereo = (channels > 1);
+
+        switch (samples) {
+        case 16:
+                if (stereo)
+                        return AL_FORMAT_STEREO16;
+                else
+                        return AL_FORMAT_MONO16;
+        case 8:
+                if (stereo)
+                        return AL_FORMAT_STEREO8;
+                else
+                        return AL_FORMAT_MONO8;
+        default:
+                return -1;
+        }
+}
+
