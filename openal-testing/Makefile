@@ -19,7 +19,7 @@ OBJS = $(patsubst %, $(OBJ_DIR)%.o, $(FILES))
 
 
 $(TRGT): $(OBJS)
-	$(CC) $(CFLAGS) -o $@ $^ ./objects/libopenal.1.18.2.dylib
+	$(CC) $(CFLAGS) -o $@ $^ ./objects/libopenal.1.18.2.dylib ./objects/libalut.dylib
 
 $(OBJS): $(OBJ_DIR)%.o: $(SOURCE_DIR)%.c
 	$(CC) -I$(INCLUDE_DIR) $(CFLAGS) -o $@ -c $<

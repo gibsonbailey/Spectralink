@@ -1,5 +1,6 @@
 #include <AL/al.h>
 #include <AL/alc.h>
+#include <AL/alut.h>
 #include <stdio.h>
 
 int main()
@@ -11,14 +12,6 @@ int main()
     {
         printf("Error initializing Audio Device.\n");        
     }
-
-
-
-
-
-
-
-
 
 
 
@@ -46,12 +39,6 @@ int main()
 
 
 
-
-
-
-
-
-
     ALuint source;
 
     alGenSources( (ALuint)1, &source);
@@ -68,14 +55,6 @@ int main()
 
 
 
-
-
-
-
-
-
-
-
     ALuint buffer;
 
     alGenBuffers( (ALuint)1, &buffer);
@@ -84,19 +63,36 @@ int main()
     ALsizei size, freq;
     ALenum format;
     ALvoid *data;
-    ALboolean loop = AL_FALSE;
+    //ALboolean loop = AL_FALSE;
 
-    alutLoadWAVFile("test.wav", &format, &data, &size, &freq, &loop);
-
-
+    alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
 
 
+    alBufferData(buffer, format, data, size, freq);
 
+    alSourcei(source, AL_BUFFER, buffer);
 
+    alSourcePlay(source);
+
+    int source_state;
+
+    alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+
+    while(source_state == AL_PLAYING)
+    {
+        alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    }
 
     printf("%s\n", alcGetString(device, ALC_DEVICE_SPECIFIER));
 
+    // cleanup context
+    alDeleteSources(1, &source);
+    alDeleteBuffers(1, &buffer);
+    device = alcGetContextsDevice(context);
+    alcMakeContextCurrent(NULL);
+    alcDestroyContext(context);
     alcCloseDevice(device);
+
 
     return 0;
 }
