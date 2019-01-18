@@ -63,10 +63,6 @@ int main()
     alGenBuffers( (ALuint)1, &buffer);
     // check for errors
 
-    ALsizei size, freq;
-    ALenum format;
-    ALvoid *data;
-    //ALboolean loop = AL_FALSE;
 
 
     // alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
