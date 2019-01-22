@@ -65,35 +65,8 @@ int main()
 
 
 
-    // alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
+    alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
 
-    WaveInfo *wave;
-    char *bufferData;
-    int ret;
-    
-    wave = WaveOpenFileForReading("./data/sin_1000Hz_-10dBFS_0.03s.wav");
-    if (!wave) {
-            fprintf(stderr, "failed to read wave file\n");
-            return -1;
-    }
-    
-    ret = WaveSeekFile(0, wave);
-    if (ret) {
-            fprintf(stderr, "failed to seek wave file\n");
-            return -1;
-    }
-    
-    bufferData = malloc(wave->dataSize);
-    if (!bufferData) {
-            perror("malloc");
-            return -1;
-    }
-    
-    ret = WaveReadFile(bufferData, wave->dataSize, wave);
-    if (ret != wave->dataSize) {
-            fprintf(stderr, "short read: %d, want: %d\n", ret, wave->dataSize);
-            return -1;
-    }
 
     alBufferData(buffer, to_al_format(wave->channels, wave->bitsPerSample), bufferData, wave->dataSize, wave->sampleRate);
 
