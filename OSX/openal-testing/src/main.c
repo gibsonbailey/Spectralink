@@ -1,6 +1,6 @@
 #include <AL/al.h>
 #include <AL/alc.h>
-#include <wave.h>
+#include <AL/alut.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -63,18 +63,22 @@ int main()
     alGenBuffers( (ALuint)1, &buffer);
     // check for errors
 
+    ALsizei size, freq;
+    ALenum format;
+    ALvoid *data;
+    ALboolean loop = AL_FALSE;
 
 
-    alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
+    alutLoadWAVFile("./data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
 
 
-    alBufferData(buffer, to_al_format(wave->channels, wave->bitsPerSample), bufferData, wave->dataSize, wave->sampleRate);
-
+    alBufferData(buffer, format, data, size, freq);
 
 
     alSourcei(source, AL_BUFFER, buffer);
 
     alSourcePlay(source);
+    printf("Playing source...\n");
 
     int source_state;
 
