@@ -65,7 +65,6 @@ int main()
 
 
 
-    // alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
 
     WaveInfo *wave;
     char *bufferData;
@@ -110,6 +109,11 @@ int main()
     while(source_state == AL_PLAYING)
     {
         alGetSourcei(source, AL_SOURCE_STATE, &source_state);
+    }
+
+    for(int i = 0; i < 1000000; i++)
+    {
+        // Delay loop
     }
 
     printf("%s\n", alcGetString(device, ALC_DEVICE_SPECIFIER));
