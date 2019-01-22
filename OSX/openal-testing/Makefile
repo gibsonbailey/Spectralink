@@ -6,7 +6,6 @@ TRGT = sound_test
 CC = gcc 
 CFLAGS = -g -Wall 
 
-
 FILES = main 
 
 INCLUDE_DIR = /usr/local/opt/openal-soft/include/

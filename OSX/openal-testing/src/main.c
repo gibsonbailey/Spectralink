@@ -65,7 +65,7 @@ int main()
     ALvoid *data;
     //ALboolean loop = AL_FALSE;
 
-    alutLoadWAVFile("../data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
+    alutLoadWAVFile("./data/sin_1000Hz_-10dBFS_0.03s.wav", &format, &data, &size, &freq);
 
 
     alBufferData(buffer, format, data, size, freq);
