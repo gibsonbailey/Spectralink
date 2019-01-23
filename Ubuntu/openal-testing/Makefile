@@ -10,7 +10,7 @@ FILES = main
 INCLUDE_DIR = /home/linuxbrew/.linuxbrew/Cellar/openal-soft/1.18.2/include/
 INCLUDES = $(patsubst %, $(INCLUDE_DIR)%.o, $(INCLUDE_FILES))
 
-INCLUDE_DIR2 = ./includes/
+INCLUDE_DIR2 = /usr/include/audio/
 
 SOURCE_DIR = src/
 

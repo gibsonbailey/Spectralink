@@ -20,7 +20,6 @@ int main()
 
 
 
-
     ALCcontext *context;
 
     context = alcCreateContext(device, NULL);
@@ -28,6 +27,7 @@ int main()
     {
         printf("Error creating context.\n");
     }
+
 
     ALfloat listenerOri[] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
     alListener3f(AL_POSITION, 0, 0, 1.0f);
