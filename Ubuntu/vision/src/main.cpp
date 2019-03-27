@@ -62,7 +62,7 @@ cv::Mat slMat2cvMat(Mat& input);
 
 
 int edgeThresh = 1;
-int lowThreshold = 5;
+int lowThreshold = 50;
 int const max_lowThreshold = 100;
 int ratio = 3;
 int kernel_size = 3;

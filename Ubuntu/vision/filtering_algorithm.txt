@@ -1,0 +1,59 @@
+int* find_max(int dst[], int x_partitions, int y_partitions){
+    
+
+        int tmp[partitions]
+
+            x_interval = ceiling(x_dim / x_partitions)
+                y_interval = ceiling(y_dim / y_partitions)
+
+
+                    for (int m = 0; m < x_partitions; m++){
+                        
+
+                                for (int n = 0; n < y_partitions; n++){
+                                    
+
+                                                max = 0
+
+                                                            for (int i = m*x_interval; i <
+                                                            (m+1)*x_interval; i++){
+                                                                
+
+                                                                                for (int j = n*y_interval;
+                                                                                j < (k+1)*y_interval; j++){
+                                                                                    
+
+                                                                                                        if
+                                                                                                        (dst[i][j]
+                                                                                                        > max){
+                                                                                                            
+
+                                                                                                                                    max
+                                                                                                                                    =
+                                                                                                                                    dst[i][j]
+
+                                                                                                                                                        }
+
+                                                                                                                                                                        }
+
+                                                                                                                                                                                    }
+
+                                                                                                                                                                                                tmp[k]
+                                                                                                                                                                                                =
+                                                                                                                                                                                                max
+
+                                                                                                                                                                                                        }
+
+
+                                                                                                                                                                                                            }
+
+                                                                                                                                                                                                                return
+                                                                                                                                                                                                                tmp
+
+                                                                                                                                                                                                                }
+                                                                                                        }
+                                                                                }
+                                                            }
+                                }
+                    }
+}
