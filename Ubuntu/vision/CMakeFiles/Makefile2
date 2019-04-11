@@ -54,10 +54,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = "/usr/local/zed/sample/Y/depth sensing"
+CMAKE_SOURCE_DIR = "/usr/local/zed/sample/Y/depth sensing/Spectralink/Ubuntu/vision"
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = "/usr/local/zed/sample/Y/depth sensing"
+CMAKE_BINARY_DIR = "/usr/local/zed/sample/Y/depth sensing/Spectralink/Ubuntu/vision"
 
 #=============================================================================
 # Target rules for target CMakeFiles/ZED_Depth_Sensing.dir

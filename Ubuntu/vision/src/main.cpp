@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 // ZED includes
 #include <sl/Camera.hpp>
@@ -58,7 +59,7 @@ void startZED();
 void run();
 void close();
 cv::Mat slMat2cvMat(Mat& input);
-
+std::string type2str(int type);
 
 
 int edgeThresh = 1;
@@ -68,6 +69,18 @@ int ratio = 3;
 int kernel_size = 3;
 char* window_name = "Edge Map";
 cv::Mat src_gray;
+
+struct Point
+{
+    int max_i;
+    int max_j;
+    int max_value;
+};
+
+void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max_filtered);
+
+const int X_PART = 11;
+const int Y_PART = 11;
 
 
 void CannyThreshold(cv::Mat src, cv::Mat& dst)
@@ -159,23 +172,137 @@ void run() {
             //zed.retrieveMeasure(point_cloud, MEASURE_XYZRGBA, MEM_GPU, width, height);
             //viewer.updatePointCloud(point_cloud);
             zed.retrieveImage(depth_map, VIEW_DEPTH);
-            
+
             std::cout << "Zed Width: " << depth_map.getWidth() << std::endl;
             std::cout << "Zed Height: " << depth_map.getHeight() << std::endl;
             std::cout << "Zed Channels: " << depth_map.getChannels() << std::endl;
             std::cout << "Zed info: " << depth_map.getInfos() << std::endl;
+            std::cout << "Type: " << type2str(src_gray.type()) << std::endl;
 
             //std::cout << "Empty: " << cv_dmap.empty() << std::endl;
 
             CannyThreshold(cv_dmap, dst);
+            cvtColor(cv_dmap, src_gray, CV_BGR2GRAY );
 
+  //          cv::imshow("ZED Depth Map", dst);
+  
+            
+            //cv::imshow("Filtered Depth Map", find_max(src_gray, 11, 11));
+            
+            Point max_filter[X_PART * Y_PART];
+            
+            find_max(dst, X_PART, Y_PART, max_filter);
+            
+            zed.retrieveMeasure(depth_map, MEASURE_XYZRGBA);
+            
+            float distance;
+            
+            for (int i = 0; i < X_PART*Y_PART; i++){
+				
+				
+				//sl::float4 point3D;
+				//depth_map.getValue(max_filter[i].max_i,max_filter[i].max_j,&point3D);
+				//depth_map.getValue(500,400,&point3D);
+				
+				std::cout << max_filter[i].max_i << " " << max_filter[i].max_j << " " << max_filter[i].max_value << std::endl;
+			    //distance = sqrt(point3D.x * point3D.x + point3D.y * point3D.y + point3D.z * point3D.z);
+			    
+			    
+			    //if (std::isnan(point3D.x) && std::isnan(point3D.y) && std::isnan(point3D.x)){
+					//std::cout << " Yuuup" << std::endl;
+					
+				//}
+			    //std::cout << point3D.x << " " << point3D.y << " " << point3D.z << " " << distance << std::endl;
+			    
 
-            cv::imshow("ZED Depth Map", dst);
+				//float depth_value=0;
+				//depth_map.getValue(500,400,&depth_value);
+				//std::cout << depth_value << std::endl;
+			}
+			
+			
+			//return;
+            
+            
             cv::waitKey(1);
 
         } else sl::sleep_ms(1000);
     }
 }
+
+void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max_filter){
+
+    char max = 0;
+    int max_i, max_j;
+    int x_interval = src.cols / x_partitions;
+    int y_interval = src.rows / y_partitions;
+    int point_counter = 0;
+    cv::Mat dst = cv::Mat(src.size(), src.type());
+    
+    for (int a=0; a < src.cols; a++){
+				for (int b=0; b < src.rows; b++){
+					dst.at<char>(b,a) = (char)0;
+				}
+			}
+
+    for (int m = 0; m < x_partitions; m++){
+        for (int n = 0; n < y_partitions; n++){
+            max = 0;
+            max_i = 0;
+            max_j = 0;
+            for (int i = m*x_interval; i <(m+1)*x_interval; i++){
+                for (int j = n*y_interval; j < (n+1)*y_interval; j++){
+					//std::cout << i << " " << j << std::endl;
+                    if (src.at<char>(j,i) > max){
+                        max = src.at<char>(j,i);
+                        max_i = i;
+                        max_j = j;
+                    }
+                }
+            }
+            
+            max_filter[point_counter] = {max_i, max_j, max};
+            point_counter++;
+	        //dst.at<char>(max_j, max_i) = max;
+	        
+	        //for (int a=n*y_interval; a < n*y_interval + 20; a++){
+				//for (int b=m*x_interval; b < m*x_interval + 20; b++){
+					//dst.at<char>(a,b) = max;
+				//}
+			//}
+	        //dst.at<char>(n*y_interval, m*x_interval) = max;
+
+        }
+    }
+}
+
+std::string type2str(int type) {
+  std::string r;
+
+  uchar depth = type & CV_MAT_DEPTH_MASK;
+  uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+  switch ( depth ) {
+    case CV_8U:  r = "8U"; break;
+    case CV_8S:  r = "8S"; break;
+    case CV_16U: r = "16U"; break;
+    case CV_16S: r = "16S"; break;
+    case CV_32S: r = "32S"; break;
+    case CV_32F: r = "32F"; break;
+    case CV_64F: r = "64F"; break;
+    default:     r = "User"; break;
+  }
+
+  r += "C";
+  r += (chans+'0');
+
+  return r;
+}
+
+
+
+
+
 
 /**
     This function closes the ZED camera, its callback (thread) and the GL viewer
