@@ -657,6 +657,12 @@ stdlib.h
 -
 math.h
 -
+signal.h
+-
+sys/types.h
+-
+sys/wait.h
+-
 sl/Camera.hpp
 -
 GLViewer.hpp

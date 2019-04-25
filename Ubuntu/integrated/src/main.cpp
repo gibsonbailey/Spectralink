@@ -5,21 +5,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-#include <glob.h>
-#include <vector>
 
 static inline ALenum to_al_format(short channels, short samples);
 
 
 int main(){
-
-    glob_t glob_result;
-    glob("../data/*",GLOB_TILDE,NULL,&glob_result);
-    for(unsigned int i=0; i<glob_result.gl_pathc; ++i)
-    {
-          printf("%s\n", glob_result.gl_pathv[i]);
-    }
-
     ALCdevice *device;
 
     device = alcOpenDevice(NULL);
@@ -71,7 +61,8 @@ int main(){
             return -1;
     }
 
-    bufferData = malloc(wave->dataSize);
+    bufferData = (char *)malloc(wave->dataSize*sizeof(char));
+    printf("Data size, %d\n",wave->dataSize);
     if (!bufferData) {
             perror("malloc");
             return -1;
@@ -123,7 +114,7 @@ int main(){
         for(int j = 0; j < repeats; j++)
         {
             alSourcePlay(source[i]);
-        
+            printf("%d\n", i);
             int source_state = AL_PLAYING;
             
             clock_t start_time = clock();

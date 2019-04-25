@@ -29,6 +29,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include <signal.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+
 
 // ZED includes
 #include <sl/Camera.hpp>
@@ -61,7 +65,8 @@ void close();
 cv::Mat slMat2cvMat(Mat& input);
 std::string type2str(int type);
 
-
+float h_max = -5;
+float h_min = 500;
 int edgeThresh = 1;
 int lowThreshold = 50;
 int const max_lowThreshold = 100;
@@ -74,13 +79,13 @@ struct Point
 {
     int max_i;
     int max_j;
-    int max_value;
+    int max_value; //R value
 };
 
 void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max_filtered);
 
-const int X_PART = 11;
-const int Y_PART = 11;
+const int X_PART = 16;
+const int Y_PART = 16;
 
 
 void CannyThreshold(cv::Mat src, cv::Mat& dst)
@@ -156,6 +161,36 @@ void startZED() {
     Add your own code here.
  **/
 void run() {
+	/*allocate the string arrays for all 20 files*/
+	char * saw261 = strdup("a"); //./sawtooth261.wav");
+	char * saw349 = strdup("b");//./sawtooth349.wav");
+	char * saw493 = strdup("c");//./sawtooth493.wav");
+	char * saw659 = strdup("d");//./sawtooth659.wav");
+	char * saw880 = strdup("e");//./sawtooth880.wav");
+	
+	char * sine261 = strdup("f");//./sine261.wav");
+	char * sine349 = strdup("g");//./sine349.wav");
+	char * sine493 = strdup("h");//./sine493.wav");
+	char * sine659 = strdup("i");//./sine659.wav");
+	char * sine880 = strdup("j");//./sine880.wav");
+	//
+	char * squ261 = strdup("k");//./square261.wav");
+	char * squ349 = strdup("l");//./square349.wav");
+	char * squ493 = strdup("m");//./square493.wav");
+	char * squ659 = strdup("n");//./square659.wav");
+	char * squ880 = strdup("o");//./square880.wav");
+	
+	char * tri261 = strdup("p");//./triangle261.wav");
+	char * tri349 = strdup("q");//./triangle349.wav");
+	char * tri493 = strdup("r");//./triangle493.wav");
+	char * tri659 = strdup("s");//./triangle659.wav");
+	char * tri880 = strdup("t");//./triangle880.wav");
+	
+	char x_val[128] = {0};
+	char y_val[128] = {0};
+	char z_val[128] = {0};
+	
+	
 
     sl::Mat depth_map(zed.getResolution(), MAT_TYPE_8U_C4);
 
@@ -163,71 +198,196 @@ void run() {
     cv::Mat cv_dmap = slMat2cvMat(depth_map);
     cv::Mat dst;
     dst.create(cv_dmap.size(), cv_dmap.type());
-
-    while (!quit) {
-        if (zed.grab() == SUCCESS) {
-            // Retrieve a colored RGBA point cloud in GPU memory and update GL viewing window
-            // width and height specify the total number of columns and rows for the point cloud dataset
-            // In this example, we retrieve and display a half size point cloud using width and height parameters
-            //zed.retrieveMeasure(point_cloud, MEASURE_XYZRGBA, MEM_GPU, width, height);
-            //viewer.updatePointCloud(point_cloud);
-            zed.retrieveImage(depth_map, VIEW_DEPTH);
-
-            std::cout << "Zed Width: " << depth_map.getWidth() << std::endl;
-            std::cout << "Zed Height: " << depth_map.getHeight() << std::endl;
-            std::cout << "Zed Channels: " << depth_map.getChannels() << std::endl;
-            std::cout << "Zed info: " << depth_map.getInfos() << std::endl;
-            std::cout << "Type: " << type2str(src_gray.type()) << std::endl;
-
-            //std::cout << "Empty: " << cv_dmap.empty() << std::endl;
-
-            CannyThreshold(cv_dmap, dst);
-            cvtColor(cv_dmap, src_gray, CV_BGR2GRAY );
-
-  //          cv::imshow("ZED Depth Map", dst);
-  
-            
-            //cv::imshow("Filtered Depth Map", find_max(src_gray, 11, 11));
-            
-            Point max_filter[X_PART * Y_PART];
-            
-            find_max(dst, X_PART, Y_PART, max_filter);
-            
-            zed.retrieveMeasure(depth_map, MEASURE_XYZRGBA);
-            
-            float distance;
-            
-            for (int i = 0; i < X_PART*Y_PART; i++){
+    char ** arg_list = (char **)malloc(sizeof(char*)*256*4);
+    
+    for (int i = 0; i < 256*4; i++){
+        arg_list[i] = (char *)malloc(sizeof(char)*128);
+        }
+		while (!quit) {
+			if (zed.grab() == SUCCESS) {
 				
+
+
+				int arg_count = 0;
 				
-				//sl::float4 point3D;
-				//depth_map.getValue(max_filter[i].max_i,max_filter[i].max_j,&point3D);
-				//depth_map.getValue(500,400,&point3D);
+				// Retrieve a colored RGBA point cloud in GPU memory and update GL viewing window
+				// width and height specify the total number of columns and rows for the point cloud dataset
+				// In this example, we retrieve and display a half size point cloud using width and height parameters
+				//zed.retrieveMeasure(point_cloud, MEASURE_XYZRGBA, MEM_GPU, width, height);
+				//viewer.updatePointCloud(point_cloud);
+				zed.retrieveImage(depth_map, VIEW_DEPTH);
+
+				//std::cout << "Zed Width: " << depth_map.getWidth() << std::endl;
+				//std::cout << "Zed Height: " << depth_map.getHeight() << std::endl;
+				//std::cout << "Zed Channels: " << depth_map.getChannels() << std::endl;
+				//std::cout << "Zed info: " << depth_map.getInfos() << std::endl;
+				//std::cout << "Type: " << type2str(src_gray.type()) << std::endl;
+
+				//std::cout << "Empty: " << cv_dmap.empty() << std::endl;
+
+				CannyThreshold(cv_dmap, dst);
+				cvtColor(cv_dmap, src_gray, CV_BGR2GRAY );
+
+	  //          cv::imshow("ZED Depth Map", dst);
+	  
 				
-				std::cout << max_filter[i].max_i << " " << max_filter[i].max_j << " " << max_filter[i].max_value << std::endl;
-			    //distance = sqrt(point3D.x * point3D.x + point3D.y * point3D.y + point3D.z * point3D.z);
-			    
-			    
-			    //if (std::isnan(point3D.x) && std::isnan(point3D.y) && std::isnan(point3D.x)){
-					//std::cout << " Yuuup" << std::endl;
+				//cv::imshow("Filtered Depth Map", find_max(src_gray, 11, 11));
+				
+				//Point max_filter_edge_system[X_PART * Y_PART];
+				Point max_filter_disparity_map[X_PART * Y_PART];
+				
+				//find_max(dst, X_PART, Y_PART, max_filter_edge_system);
+				find_max(src_gray, X_PART, Y_PART, max_filter_disparity_map);
+				
+				zed.retrieveMeasure(depth_map, MEASURE_XYZRGBA);
+				
+				//float distance;
+				int valid_sources = 0;
+				for (int i = 0; i < X_PART*Y_PART; i++){
 					
-				//}
-			    //std::cout << point3D.x << " " << point3D.y << " " << point3D.z << " " << distance << std::endl;
-			    
+					
+					sl::float4 point3D;
+					depth_map.getValue(max_filter_disparity_map[i].max_i,max_filter_disparity_map[i].max_j,&point3D);
+					//depth_map.getValue(500,400,&point3D);
+					
+					//std::cout << max_filter[i].max_i << " " << max_filter[i].max_j << " " << max_filter[i].max_value << std::endl;
+					//distance = sqrt(point3D.x * point3D.x + point3D.y * point3D.y + point3D.z * point3D.z);
+					
+					
+					//if (std::isnan(point3D.x) && std::isnan(point3D.y) && std::isnan(point3D.x)){
+						//std::cout << " Yuuup" << std::endl;
+						
+					//}
+					//std::cout << point3D.x << " " << point3D.y << " " << point3D.z << " " << std::endl;
+					
 
-				//float depth_value=0;
-				//depth_map.getValue(500,400,&depth_value);
-				//std::cout << depth_value << std::endl;
-			}
-			
-			
-			//return;
-            
-            
-            cv::waitKey(1);
-
-        } else sl::sleep_ms(1000);
-    }
+					//float depth_value=0;
+					//depth_map.getValue(500,400,&depth_value);
+					//std::cout << depth_value << std::endl;
+					
+					float h = atan(point3D.z/(sqrt(point3D.x * point3D.x + point3D.y * point3D.y)));
+					//convert h from radians to degrees
+					h = h*180/M_PI;
+					//printf("%f\n", h);
+					//printf("max: %f\nmin: %f\n", h_max, h_min);
+					if(h > h_max)
+						h_max = h;
+					if(h < h_min)
+						h_min = h;
+					//sort the values and add the correct strings to argv
+					if(!std::isnan(point3D.x)){
+						if(max_filter_disparity_map[i].max_value < 51){
+							if(h > -22.5){
+								arg_list[arg_count] = saw261;
+							}
+							if(h <= -22.5 && h > -45.0){
+								arg_list[arg_count] = squ261;
+							}
+							if(h <= -45.0 && h > -67.5){
+								arg_list[arg_count] = tri261;
+							}
+							if(h <= -67.5){
+								arg_list[arg_count] = sine261;
+							}
+						}
+						else if((max_filter_disparity_map[i].max_value >= 51) && (max_filter_disparity_map[i].max_value < 103)){
+							if(h > -22.5){
+								arg_list[arg_count] = saw349;
+							}
+							if(h <= -22.5 && h > -45.0){
+								arg_list[arg_count] = squ349;
+							}
+							if(h <= -45.0 && h > -67.5){
+								arg_list[arg_count] = tri349;
+							}
+							if(h <= -67.5){
+								arg_list[arg_count] = sine349;
+							}	
+						}
+								
+						else if((max_filter_disparity_map[i].max_value >= 103) && (max_filter_disparity_map[i].max_value < 154)){
+							if(h > -22.5){
+								arg_list[arg_count] = saw493;
+							}
+							if(h <= -22.5 && h > -45.0){
+								arg_list[arg_count] = squ493;
+							}
+							if(h <= -45.0 && h > -67.5){
+								arg_list[arg_count] = tri493;
+							}
+							if(h <= -67.5){
+								arg_list[arg_count] = sine493;
+							}		
+						}
+						else if((max_filter_disparity_map[i].max_value >= 154) && (max_filter_disparity_map[i].max_value < 205)){
+							if(h > -22.5){
+								arg_list[arg_count] = saw659;
+							}
+							if(h <= -22.5 && h > -45.0){
+								arg_list[arg_count] = squ659;
+							}
+							if(h <= -45.0 && h > -67.5){
+								arg_list[arg_count] = tri659;
+							}
+							if(h <= -67.5){
+								arg_list[arg_count] = sine659;
+							}						
+						}
+						else if(max_filter_disparity_map[i].max_value >= 205){
+							if(h > -22.5){
+								arg_list[arg_count] = saw880;
+							}
+							if(h <= -22.5 && h > -45.0){
+								arg_list[arg_count] = squ880;
+							}
+							if(h <= -45.0 && h > -67.5){
+								arg_list[arg_count] = tri880;
+							}
+							if(h <= -67.5){
+								arg_list[arg_count] = sine880;
+							}
+						
+						}
+						else {}
+						
+						memset(x_val, 0, sizeof(char) *128);
+						memset(y_val, 0, sizeof(char) *128);
+						memset(z_val, 0, sizeof(char) *128);
+						
+						snprintf(x_val, sizeof(x_val), "%f", point3D.x);
+						snprintf(y_val, sizeof(y_val), "%f", point3D.y);
+						snprintf(z_val, sizeof(z_val), "%f", point3D.z);
+						//printf("%s %s %s\n", x_val, y_val, z_val);
+						
+						//set this to +0, +1, +2 if the name of the file has not been found otherwise +1 +2 + 3
+						arg_list[arg_count +1] = strdup(x_val);
+						arg_list[arg_count +2] = strdup(y_val);
+						arg_list[arg_count +3] = strdup(z_val);
+						arg_count  +=4;
+						valid_sources++; //counting how many !isnan()
+					}
+						
+				}
+				//printf("arg_count: %d\n", arg_count);
+				arg_list[arg_count] = '\0';
+				//printf("%s\n", arg_list[20]);
+				pid_t pid = fork(); //fork();
+				pid_t wpid;
+				int status = 0;
+				if(pid == 0)
+                {
+					execv("/usr/local/zed/sample/Y/depth_sensing/Spectralink/Ubuntu/sound/sound_test", arg_list);
+				}
+		
+				while((wpid = wait(&status))> 0){}
+					cv::waitKey(1);
+				
+			} else sl::sleep_ms(1000);
+	}
+    for (int i = 0; i < 256*4; i++){
+        free(arg_list[i]);
+        }
+	free(arg_list);
 }
 
 void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max_filter){
@@ -238,7 +398,6 @@ void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max
     int y_interval = src.rows / y_partitions;
     int point_counter = 0;
     cv::Mat dst = cv::Mat(src.size(), src.type());
-    
     for (int a=0; a < src.cols; a++){
 				for (int b=0; b < src.rows; b++){
 					dst.at<char>(b,a) = (char)0;
@@ -252,7 +411,6 @@ void find_max(const cv::Mat& src, int x_partitions, int y_partitions, Point* max
             max_j = 0;
             for (int i = m*x_interval; i <(m+1)*x_interval; i++){
                 for (int j = n*y_interval; j < (n+1)*y_interval; j++){
-					//std::cout << i << " " << j << std::endl;
                     if (src.at<char>(j,i) > max){
                         max = src.at<char>(j,i);
                         max_i = i;

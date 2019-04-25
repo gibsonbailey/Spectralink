@@ -8,9 +8,8 @@
 
 static inline ALenum to_al_format(short channels, short samples);
 
-int playsound();
 
-int playsound(){
+int main(){
     ALCdevice *device;
 
     device = alcOpenDevice(NULL);
